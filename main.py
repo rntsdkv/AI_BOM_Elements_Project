@@ -15,5 +15,10 @@ def search(query=None):
     return render_template('search.html', len=len(items), Items=items)
 
 
+@app.route("/download_example")
+def download_example():
+    return render_template('downloads.html')
+
+
 if __name__ == "__main__":
     app.run(host="localhost", port=3550)
