@@ -5,35 +5,36 @@ h1 {
 }
 
 .load_example {
-    padding: 8px 12px 8px 12px;
+    padding: 12px 16px 12px 16px;
     text-align: center;
     margin: 50px 12px 50px 50px;
-    background-color: orangered;
+    background-color: gray;
     color: white;
     font-family: Onest, serif;
     font-size: 20px;
-    border-radius: 50px;
+    border-radius: 12px;
     border: none;
+    text-decoration: none;
 }
 
-.load_example.hover {
+.load_example:hover {
     background-color: black;
     color: white;
 }
 
 .load_bom {
-    padding: 8px 12px 8px 12px;
+    padding: 12px 16px 12px 16px;
     text-align: center;
     margin: 50px 50px 50px 12px;
     background-color: orangered;
     color: white;
     font-family: Onest, serif;
     font-size: 20px;
-    border-radius: 50px;
+    border-radius: 12px;
     border: none;
 }
 
-.load_bom.hover {
+.load_bom:hover {
     background-color: black;
     color: white;
 }

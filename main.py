@@ -15,8 +15,8 @@ def search(query=None):
     return render_template('search.html', len=len(items), Items=items)
 
 
-@app.route("/download_example")
-def download_example():
+@app.route("/downloads")
+def downloads():
     return render_template('downloads.html')
 
 
