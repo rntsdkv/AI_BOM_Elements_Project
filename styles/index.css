@@ -1,0 +1,39 @@
+h1 {
+    margin: 50px;
+    font-family: Onest, serif;
+    font-size: 50px;
+}
+
+.load_example {
+    padding: 8px 12px 8px 12px;
+    text-align: center;
+    margin: 50px 12px 50px 50px;
+    background-color: orangered;
+    color: white;
+    font-family: Onest, serif;
+    font-size: 20px;
+    border-radius: 50px;
+    border: none;
+}
+
+.load_example.hover {
+    background-color: black;
+    color: white;
+}
+
+.load_bom {
+    padding: 8px 12px 8px 12px;
+    text-align: center;
+    margin: 50px 50px 50px 12px;
+    background-color: orangered;
+    color: white;
+    font-family: Onest, serif;
+    font-size: 20px;
+    border-radius: 50px;
+    border: none;
+}
+
+.load_bom.hover {
+    background-color: black;
+    color: white;
+}
