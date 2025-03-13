@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from functions import *
 
 app = Flask(__name__)
 
@@ -6,6 +7,12 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return render_template('index.html')
+
+
+@app.route("/search/<query>")
+def search(query=None):
+    items = get_chipdip(query)
+    return render_template('search.html', len=len(items), Items=items)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+    <link rel="stylesheet" href="../styles/search.css">
+</head>
+<body>
+  {%for item, value in Items.items()%}
+    <div class="item">
+        <h1 class="item-name">{{value['name']}}</h1>
+        <img class="item-image" src={{value['image_url']}}>
+    </div>
+  {%endfor%}
+</body>
+</html>

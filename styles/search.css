@@ -1,0 +1,9 @@
+.item-name {
+    color: red;
+}
+
+.item {
+    height: 100px;
+    weight: 50px;
+    background-color: black;
+}
