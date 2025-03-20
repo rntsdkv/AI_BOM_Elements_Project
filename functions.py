@@ -2,9 +2,21 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import os
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS, InMemoryVectorStore
+from langchain_huggingface import HuggingFaceEmbeddings
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/111.0.0.0 Safari/537.36'}
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=100,
+    length_function=len
+)
+
+emb_model = HuggingFaceEmbeddings(model_name="cointegrated/LaBSE-en-ru")
 
 
 def get_chipdip_items(query):
@@ -35,6 +47,7 @@ def get_chipdip(query):
 
     return items_dict
 
+
 # for item in get_chipdip_items("Магниторезистивный датчик"):
 #     if 'product' in item.get('href'):
 #         print(item)
@@ -59,6 +72,7 @@ def get_datasheet(url):
     datasheet_urls = [sheet.get('href') for sheet in datasheets]
     return datasheet_urls
 
+
 # print(get_datasheet("https://www.chipdip.ru/product/ld7522ps"))
 
 
@@ -81,7 +95,46 @@ def download_file(url, name=None):
         return True
     return False
 
+
 # print(download_file("https://static.chipdip.ru/lib/046/DOC003046561.pdf"))
+
+
+def vectorize_file(path):
+    '''
+    Позволяет сплитовать и векторизовать pdf-файлы
+    :param path: путь к файлу
+    :return: путь к векторизованному файлу
+    '''
+    file_name = path.split('/')[-1]
+    pdf_loader = PyPDFLoader(path)
+    docs = pdf_loader.load()
+    text_content = [doc.page_content for doc in docs]
+
+    splitted_document = splitter.create_documents(text_content)
+
+    vector_store = FAISS.from_documents(splitted_document, emb_model)
+    vector_store.save_local(os.path.join('vectorization', file_name))
+
+    return os.path.join('vectorization', file_name)
+
+
+# print(vectorize_file("downloads/DOC003046561.pdf"))
+
+
+def get_similarity_from_vectorization(path, query, k=3):
+    '''
+    Позволяет получить наиболее похожие части векторизованного файла на запрос
+    :param path: путь к векторизованному файлу (dir)
+    :param query: запрос
+    :param k: количество возвращаемых результатов
+    :return:
+    '''
+    vector_store = FAISS.load_local(path, emb_model, allow_dangerous_deserialization=True)
+    content = [doc.page_content for doc in vector_store.similarity_search(query, k=k)]
+    return content
+
+
+# print(get_similarity_from_vectorization("vectorization/DOC003046561.pdf", "shutdown"))
 
 
 def parse_bom(file: str):
@@ -94,6 +147,5 @@ def parse_bom(file: str):
     elif file.endswith('.txt'):
         data = pd.read_csv(file, sep=';', index_col='Index')
         return data
-
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
