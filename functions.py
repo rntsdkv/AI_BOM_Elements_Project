@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/111.0.0.0 Safari/537.36'}
@@ -41,4 +42,19 @@ def get_chipdip(query):
 #     # res = BeautifulSoup(item, "html.parser").find('a', attrs={'class': ['link']})
 #     # print(res)
 
-print(get_chipdip("Магниторезистивный датчик цифровой"))
+# print(get_chipdip("Магниторезистивный датчик цифровой"))
+
+
+def parse_bom(file: str):
+    if file.endswith('.xlsx'):
+        data = pd.read_excel(file, index_col='Index')
+        return data
+    elif file.endswith('.csv'):
+        data = pd.read_csv(file, sep=';', index_col='index')
+        return data
+    elif file.endswith('.txt'):
+        data = pd.read_csv(file, sep=';', index_col='Index')
+        return data
+
+
+print(parse_bom('bom_examples/bom_example.xlsx'))
