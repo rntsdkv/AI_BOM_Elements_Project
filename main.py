@@ -21,10 +21,13 @@ def index():
     return response
 
 
-@app.route("/search/<query>")
+@app.route("/search")
 def search(query=None):
-    items = get_chipdip(query)
-    return render_template('search.html', len=len(items), Items=items)
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return render_template('not_cookie.html')
+    # items = get_chipdip(query)
+    # return render_template('search.html', len=len(items), Items=items)
 
 
 @app.route('/upload', methods=['POST'])
