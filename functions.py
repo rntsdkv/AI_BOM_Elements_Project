@@ -12,12 +12,12 @@ from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
+
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/111.0.0.0 Safari/537.36'}
 
-
 if not os.environ.get("GROQ_API_KEY"):
-        os.environ["GROQ_API_KEY"] = config.Grock
+    os.environ["GROQ_API_KEY"] = config.Grock
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
@@ -29,9 +29,10 @@ emb_model = HuggingFaceEmbeddings(model_name="cointegrated/LaBSE-en-ru")
 
 
 def capcha_fix(url):
-    print("\n"*10)
+    print("\n" * 10)
     print('WARNING:', 'https://www.chipdip.ru' + url)
     input("Пройдите капчу по ссылке и нажмиет Enter")
+
 
 def get_chipdip_items(query):
     query = query.replace(' ', '+')
@@ -42,6 +43,7 @@ def get_chipdip_items(query):
     items = [item.get('href') for item in items if 'product' in item.get('href')]
     return items
 
+
 def get_chipdip_item_info(href, capcha=capcha_fix):
     print('ITEM INFO:', 'https://www.chipdip.ru' + href)
     response = requests.get('https://www.chipdip.ru' + href, headers=headers)
@@ -50,7 +52,6 @@ def get_chipdip_item_info(href, capcha=capcha_fix):
         meta_tag = parser.find('meta', attrs={'name': 'keywords'})
         name = meta_tag.get('content', '') if meta_tag else 'Не найдено'
         description = parser.find('meta', attrs={'name': 'description'}).get('content', '')
-
 
         table = parser.find("table", class_="product__params ptext", id="productparams")
 
@@ -64,7 +65,6 @@ def get_chipdip_item_info(href, capcha=capcha_fix):
                     name_p = name_tag.text.strip()
                     value = value_tag.text.strip()
                     params[name_p] = value
-        
 
         availability_tag = parser.find("span", class_="item__avail")
 
@@ -82,7 +82,9 @@ def get_chipdip_item_info(href, capcha=capcha_fix):
         capcha(href)
         return get_chipdip_item_info(href=href, capcha=capcha)
     image_url = parser.find('img', attrs={'class': 'product__image-preview'}).get('src')
-    return {'name': name, 'image_url': image_url, 'description': description, "params": params, "availability":stock, "href":href}
+    return {'name': name, 'image_url': image_url, 'description': description, "params": params, "availability": stock,
+            "href": href}
+
 
 def get_chipdip(query):
     items = get_chipdip_items(query)
@@ -194,10 +196,12 @@ def parse_bom(file: str):
         data = pd.read_csv(file, sep=';')
         return data
 
+
 def parse_characteristics(char_str):
     if pd.isna(char_str):
         return []  # Если характеристик нет, возвращаем пустой словарь
-    return [{"name":item.split(": ")[0], "num":item.split(": ")[1]} for item in char_str.split(", ")]
+    return [{"name": item.split(": ")[0], "num": item.split(": ")[1]} for item in char_str.split(", ")]
+
 
 def read_data(data):
     print(data)
@@ -206,6 +210,7 @@ def read_data(data):
     # Преобразуем в словарь
     result = data.set_index("name").to_dict(orient="index")
     return result
+
 
 def llm_search(object, key):
     prompt = """
@@ -229,29 +234,30 @@ def llm_search(object, key):
     {name}: {num}
 """
     characteristics = FewShotPromptTemplate(
-            examples=object['characteristics'],
-            prefix="", 
-            example_prompt=PromptTemplate(
-                template=exmpls_prompt,
-                input_variables=["name", "num"],
-                example_separator="\n------------\n"
-            ),
-            suffix="", 
-            input_variables=[]
-        ).format()
+        examples=object['characteristics'],
+        prefix="",
+        example_prompt=PromptTemplate(
+            template=exmpls_prompt,
+            input_variables=["name", "num"],
+            example_separator="\n------------\n"
+        ),
+        suffix="",
+        input_variables=[]
+    ).format()
     prompt = PromptTemplate(
         template=prompt,
         input_variables=["name", "manufacturer", "characteristics"],
     ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics)
     llm = init_chat_model("deepseek-r1-distill-llama-70b", model_provider="groq")
     llm2 = init_chat_model("llama3-8b-8192", model_provider="groq")
-    search = llm2.invoke("Ты думал вот так:"+llm.invoke(prompt).content+"\nВыдели из этих рассуждений финальный ответ(запрос в поисковим) и верни мне только ЕГО:")
+    search = llm2.invoke("Ты думал вот так:" + llm.invoke(
+        prompt).content + "\nВыдели из этих рассуждений финальный ответ(запрос в поисковим) и верни мне только ЕГО:")
     chip = get_chipdip(search.content)
 
     chip_availability = []
 
     for i in chip.keys():
-        if(chip[i]["availability"] >= object["quantity"]):
+        if (chip[i]["availability"] >= object["quantity"]):
             chip_availability.append(chip[i])
 
     return {}
@@ -263,35 +269,38 @@ def search_BOM(path):
     print(data)
     for i in data.keys():
         print(i)
-        if(data[i]["url"] != data[i]["url"]):
+        if (data[i]["url"] != data[i]["url"]):
             result[i] = llm_search(data[i], i)
             result[i]["history"] = result[i].get("history", list())
-            result[i]["history"].append({"type":"sys", 'msg':"Найдено по характеристикам в таблице"})
+            result[i]["history"].append({"type": "sys", 'msg': "Найдено по характеристикам в таблице"})
         else:
             req = get_chipdip_item_info(data[i]["url"])
-            print("\\/ "*20)
-            print("Название: ",req["name"])
-            print("Описание: ",req["description"])
+            print("\\/ " * 20)
+            print("Название: ", req["name"])
+            print("Описание: ", req["description"])
             print("Наличие: ", req["availability"])
-            print("\nПараметры\n","-"*30)
+            print("\nПараметры\n", "-" * 30)
             for j in req["params"].keys():
                 print(j, ": ", req["params"][j])
-            print("/\\ "*20)
+            print("/\\ " * 20)
             print("\n\n")
             result[i] = req
             result[i]["history"] = result[i].get("history", list())
-            result[i]["history"].append({"type":"sys", 'msg':"Взято по ссылке из таблицы"})
-            if(req["availability"] < data[i]["quantity"]):
+            result[i]["history"].append({"type": "sys", 'msg': "Взято по ссылке из таблицы"})
+            if (req["availability"] < data[i]["quantity"]):
                 result[i] = llm_search(data[i], i)
                 result[i]["history"] = result[i].get("history", list())
-                result[i]["history"].append({"type":"sys", 'msg':"Оригинала слишком мало: " + str(req["availability"])})
+                result[i]["history"].append(
+                    {"type": "sys", 'msg': "Оригинала слишком мало: " + str(req["availability"])})
     return result
+
+
 # print(parse_bom('bom_examples/bom_example.xlsx'))
 
-if __name__=="__main__":
+if __name__ == "__main__":
     print(search_BOM('bom_examples/bom_example.csv'))
 
-    #Генератор красивого отчёта
+    # Генератор красивого отчёта
 #    chip = get_chipdip("Стабилизатор напряжения 5V; 6V-36V input")
 #    print("\n"*5)
 #    for i in chip.keys():
