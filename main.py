@@ -1,11 +1,15 @@
 from flask import Flask, render_template, jsonify, request, make_response
 from functions import *
+from item import Item
 import string
 import secrets
 
 alphabet = string.ascii_letters + string.digits + '_'
 
 app = Flask(__name__)
+
+results = {"Магниторезистентный цифровой вольтметр": [Item("https://www.chipdip.ru/product0/8031325911", "Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
+           "Миллиомметр": [Item("https://www.chipdip.ru/product/dt-5302", "DT-5302, Миллиомметр", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
 
 
 def check_downloads():
