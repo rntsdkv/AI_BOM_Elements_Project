@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS, InMemoryVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
-
+import re
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/111.0.0.0 Safari/537.36'}
 
@@ -33,7 +33,6 @@ def get_chipdip_items(query):
     items = [item.get('href') for item in items if 'product' in item.get('href')]
     return items
 
-
 def get_chipdip_item_info(href, capcha=capcha_fix):
     print('ITEM INFO:', 'https://www.chipdip.ru' + href)
     response = requests.get('https://www.chipdip.ru' + href, headers=headers)
@@ -56,19 +55,31 @@ def get_chipdip_item_info(href, capcha=capcha_fix):
                     name_p = name_tag.text.strip()
                     value = value_tag.text.strip()
                     params[name_p] = value
+        
+
+        availability_tag = parser.find("span", class_="item__avail")
+
+        # Извлекаем текст из тега <b>
+        if availability_tag:
+            bold_tag = availability_tag.find("b")
+            if bold_tag:
+                # Достаём число с помощью регулярного выражения
+                match = re.search(r"\d+", bold_tag.text)
+                if match:
+                    stock = int(match.group())  # Преобразуем в число
+                    print(f"В наличии: {stock} шт.")
 
     except:
         capcha(href)
         return get_chipdip_item_info(href=href, capcha=capcha)
     image_url = parser.find('img', attrs={'class': 'product__image-preview'}).get('src')
-    return {'name': name, 'image_url': image_url, 'description': description, "params": params}
-
+    return {'name': name, 'image_url': image_url, 'description': description, "params": params, "availability":stock}
 
 def get_chipdip(query):
     items = get_chipdip_items(query)
     items_dict = {}
 
-    for i in range(len(items))[0:2]:
+    for i in range(len(items)):
         items_dict[items[i]] = get_chipdip_item_info(items[i])
 
     return items_dict
@@ -177,12 +188,14 @@ def parse_bom(file: str):
 # print(parse_bom('bom_examples/bom_example.xlsx'))
 
 if __name__=="__main__":
-    chip = get_chipdip("Резистор 100 Ом")
+    chip = get_chipdip("Стабилизатор напряжения 5V в корпусе TO-92")
+    print("\n"*5)
     for i in chip.keys():
         print(i)
         print("Название: ",chip[i]["name"])
         print("Описание: ",chip[i]["description"])
-        print("Параметры\n","-"*30)
+        print("Наличие: ", chip[i]["availability"])
+        print("\nПараметры\n","-"*30)
         for j in chip[i]["params"].keys():
             print(j, ": ", chip[i]["params"][j])
         print("\n\n")
