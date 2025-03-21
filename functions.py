@@ -148,4 +148,74 @@ def parse_bom(file: str):
         data = pd.read_csv(file, sep=';', index_col='Index')
         return data
 
+
 # print(parse_bom('bom_examples/bom_example.xlsx'))
+
+
+def get_catalogs():
+    '''
+    Возвращает список объектов div, содержащих тематические каталоги из ChipDip
+    :return: []
+    '''
+    response = requests.get("https://www.chipdip.ru/catalog", headers=headers)
+    parser = BeautifulSoup(response.content, "html.parser")
+    catalogs = parser.find_all('div', attrs={"class": "catalog__g1 clear"})
+    return [str(catalog) for catalog in catalogs]
+
+
+# print(get_catalogs())
+# catalog0 = get_catalogs()[0]
+# print(catalog0)
+# print(type(catalog0))
+
+
+def get_subcatalogs(catalog):
+    '''
+    Возвращает ссылки всех подкаталогов каталога
+    :param catalog: str – html code
+    :return: []
+    '''
+    parser = BeautifulSoup(catalog, "html.parser")
+    subcatalogs = parser.find_all('a', attrs={"class": "link"})
+    subcatalog_urls = [subcatalog.get('href') for subcatalog in subcatalogs]
+    return subcatalog_urls[1:]
+
+
+def get_subsubcatalogs(url):
+    '''
+    Возвращает ссылки всех подподкаталогов подкаталога
+    :param url: url for subcatalog
+    :return: []
+    '''
+    response = requests.get(url, headers=headers)
+    catalog_div = BeautifulSoup(response.content, "html.parser").find("div", attrs={"class": "catalog"})
+    parser = BeautifulSoup(str(catalog_div), "html.parser")
+    subsubcatalogs = parser.find_all('a', attrs={"class": "link"})
+    subsubcatalog_urls = [subsubcatalog.get('href') for subsubcatalog in subsubcatalogs]
+    return subsubcatalog_urls
+
+
+# print(get_subsubcatalogs("https://www.chipdip.ru/catalog/ic-chip"))
+
+
+def get_items_of_subsubcatalof(url, page_number=0):
+    if page_number != 0:
+        url += f"?page={page_number}"
+
+    print(page_number)
+
+    response = requests.get(url, headers=headers)
+    items_column_div = BeautifulSoup(response.content, "html.parser").find("div", attrs={"class": "items-column"})
+    if not items_column_div:
+        return []
+
+    items = BeautifulSoup(str(items_column_div), "html.parser").find_all("a", attrs={"class": "link"})
+    items_urls = [item.get("href") for item in items]
+    return [items_urls] + get_items_of_subsubcatalof(url, page_number+1)
+
+
+# print(get_items_of_subsubcatalof("https://www.chipdip.ru/catalog/ic-ac-dc-converters"))
+
+# for catalog in get_catalogs():
+#     subcatalogs = get_subcatalogs(catalog)
+#     print(len(subcatalogs))
