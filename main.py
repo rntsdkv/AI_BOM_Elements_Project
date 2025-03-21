@@ -22,10 +22,11 @@ def index():
 
 
 @app.route("/search")
-def search(query=None):
+def search():
     user_id = request.cookies.get("user_id")
     if not user_id:
         return render_template('not_cookie.html')
+    return render_template('search.html')
     # items = get_chipdip(query)
     # return render_template('search.html', len=len(items), Items=items)
 
