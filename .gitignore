@@ -2,3 +2,6 @@
 .DS_Store
 /downloads/
 /vectorization/
+.venv
+__pycache__
+config.py
