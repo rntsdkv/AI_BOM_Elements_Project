@@ -19,6 +19,11 @@ splitter = RecursiveCharacterTextSplitter(
 emb_model = HuggingFaceEmbeddings(model_name="cointegrated/LaBSE-en-ru")
 
 
+def capcha_fix(url):
+    print("\n"*10)
+    print('WARNING:', 'https://www.chipdip.ru' + url)
+    input("Пройдите капчу по ссылке и нажмиет Enter")
+
 def get_chipdip_items(query):
     query = query.replace(' ', '+')
 
@@ -29,20 +34,41 @@ def get_chipdip_items(query):
     return items
 
 
-def get_chipdip_item_info(href):
+def get_chipdip_item_info(href, capcha=capcha_fix):
     print('ITEM INFO:', 'https://www.chipdip.ru' + href)
     response = requests.get('https://www.chipdip.ru' + href, headers=headers)
     parser = BeautifulSoup(response.content, "html.parser")
-    name = parser.find('h1', attrs={'itemprop': ['name']}).text
+    try:
+        meta_tag = parser.find('meta', attrs={'name': 'keywords'})
+        name = meta_tag.get('content', '') if meta_tag else 'Не найдено'
+        description = parser.find('meta', attrs={'name': 'description'}).get('content', '')
+
+
+        table = parser.find("table", class_="product__params ptext", id="productparams")
+
+        params = {}
+        if table:
+            for row in table.find_all("tr"):
+                name_tag = row.find("td", class_="product__param-name")
+                value_tag = row.find("td", class_="product__param-value")
+
+                if name_tag and value_tag:
+                    name_p = name_tag.text.strip()
+                    value = value_tag.text.strip()
+                    params[name_p] = value
+
+    except:
+        capcha(href)
+        return get_chipdip_item_info(href=href, capcha=capcha)
     image_url = parser.find('img', attrs={'class': 'product__image-preview'}).get('src')
-    return {'name': name, 'image_url': image_url}
+    return {'name': name, 'image_url': image_url, 'description': description, "params": params}
 
 
 def get_chipdip(query):
     items = get_chipdip_items(query)
     items_dict = {}
 
-    for i in range(len(items)):
+    for i in range(len(items))[0:2]:
         items_dict[items[i]] = get_chipdip_item_info(items[i])
 
     return items_dict
@@ -149,3 +175,14 @@ def parse_bom(file: str):
         return data
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
+
+if __name__=="__main__":
+    chip = get_chipdip("Резистор 100 Ом")
+    for i in chip.keys():
+        print(i)
+        print("Название: ",chip[i]["name"])
+        print("Описание: ",chip[i]["description"])
+        print("Параметры\n","-"*30)
+        for j in chip[i]["params"].keys():
+            print(j, ": ", chip[i]["params"][j])
+        print("\n\n")
