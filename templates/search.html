@@ -6,11 +6,47 @@
     <link rel="stylesheet" href="../static/search.css">
 </head>
 <body>
-  {%for item, value in Items.items()%}
-    <div class="item">
-        <h1 class="item-name">{{value['name']}}</h1>
-        <img class="item-image" src={{value['image_url']}}>
-    </div>
-  {%endfor%}
+  <div class="search">
+      <header>
+          <span class="title">
+              Ваши элементы
+          </span>
+          <div class="header-buttons">
+              <div class="results-button active">Результат</div>
+              <div class="ai-chat-button">AI-чат</div>
+          </div>
+      </header>
+
+      <!--{%for item, value in Items.items()%}-->
+      <!--<div class="item">-->
+      <!--    <h1 class="item-name">{{value['name']}}</h1>-->
+      <!--    <img class="item-image" src={{value['image_url']}}>-->
+      <!--</div>-->
+      <!--{%endfor%}-->
+
+      <div class="results">
+          <div class="item">
+              <div class="item-header">
+                  <div class="item-number">1</div>
+                  <span class="item-name">
+                      Магнитный цифровой вольтметр
+                  </span>
+              </div>
+
+              <div class="item-results">
+                  <div class="item-result">
+                      <img class="item-image" src="" alt="">
+                      <p class="item-text">item name</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="ai-chat hidden">
+
+      </div>
+  </div>
+
+  <script src="../static/search.js"></script>
 </body>
 </html>
