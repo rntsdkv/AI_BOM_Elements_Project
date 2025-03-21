@@ -9,9 +9,39 @@
     <link rel="stylesheet" href="../static/index.css">
 </head>
 <body>
-    <h1 class="title">Подбор элементной базы по BOM-спецификации</h1>
-    <a class="load_example" href="/downloads">Загрузить шаблон BOM</a>
-    <input type="file">
-    <button class="load_bom">Загрузить BOM</button>
+<!--    <h1 class="title">Подбор элементной базы</h1>-->
+<!--    <a class="load_example" href="/downloads">Загрузить шаблон BOM</a>-->
+<!--    <button class="load_bom">Загрузить BOM</button>-->
+<!--    <p></p>-->
+<!--    <input type="file">-->
+
+    <div class="window">
+        <span class="title">
+            Подбор элементной базы
+        </span>
+
+        <div class="input-frame" id="drop-area">
+            <div class="subframe"></div>
+            <div class="subframe">
+                <span class="frame-title">
+                    Перетащите сюда файл спецификации
+                </span>
+                <span class="frame-subtitle">
+                    .xlsx, .csv, .txt
+                </span>
+                <button class="load-button hidden" id="load-button" hidden>
+                    Начать поиск
+                </button>
+                <input id="input-file" type="file" accept=".txt,.csv,.xlsx" hidden>
+            </div>
+            <div class="subframe">
+                <a class="download-example" href="/downloads">
+                    Загрузить шаблон спецификации
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/index.js"></script>
 </body>
 </html>
