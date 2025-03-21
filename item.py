@@ -44,3 +44,11 @@ class Item:
             self.availability = dictionary['availability'] if 'availability' in keys else ""
         except Exception as e:
             return e
+
+    def as_dict(self):
+        return {'name': self.name,
+                'url': self.url,
+                'image': self.image,
+                'description': self.description,
+                'characteristics': self.characteristics,
+                'availability': self.availability}

@@ -145,7 +145,6 @@ header {
 }
 
 .item-name {
-  width: 377px;
   height: 31px;
   flex-grow: 0;
   font-family: Onest;
@@ -171,7 +170,7 @@ header {
 }
 
 .item-result {
-  width: 200px;
+  width: 160px;
   height: 200px;
   flex-grow: 0;
   display: flex;
@@ -182,6 +181,44 @@ header {
   padding: 10px;
   border-radius: 8px;
   background-color: rgba(211, 211, 211, 0.5);
+}
+
+.item-image-box {
+  width: 140px;
+  align-self: stretch;
+  flex-grow: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-height: 120px;
+  align-content: center;
+}
+
+.item-text-box {
+  align-self: stretch;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0;
+}
+
+.item-image {
+  max-width: 140px;
+  max-height: 120px;
+}
+
+.item-text {
+  color: black;
+  font-family: Onest;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.item-text:hover {
+  text-decoration: underline;
 }
 
 .active {

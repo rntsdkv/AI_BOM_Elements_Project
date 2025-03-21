@@ -15,31 +15,30 @@
               <div class="results-button active">Результат</div>
               <div class="ai-chat-button">AI-чат</div>
           </div>
-      </header>
-
-      <!--{%for item, value in Items.items()%}-->
-      <!--<div class="item">-->
-      <!--    <h1 class="item-name">{{value['name']}}</h1>-->
-      <!--    <img class="item-image" src={{value['image_url']}}>-->
-      <!--</div>-->
-      <!--{%endfor%}-->
+      </header
 
       <div class="results">
-          <div class="item">
-              <div class="item-header">
-                  <div class="item-number">1</div>
-                  <span class="item-name">
-                      Магнитный цифровой вольтметр
-                  </span>
-              </div>
+          {% for i in range(length) %}
+              <div class="item">
+                  <div class="item-header">
+                      <div class="item-number">{{i+1}}</div>
+                      <span class="item-name">{{titles[i]}}</span>
+                  </div>
 
-              <div class="item-results">
-                  <div class="item-result">
-                      <img class="item-image" src="" alt="">
-                      <p class="item-text">item name</p>
+                  <div class="item-results">
+                      {% for item in results[titles[i]] %}
+                          <div class="item-result">
+                              <div class="item-image-box">
+                                  <img class="item-image" src={{item.image}} alt="">
+                              </div>
+                              <div class="item-text-box">
+                                  <a class="item-text" href={{item.url}}>{{item.name}}</a>
+                              </div>
+                          </div>
+                      {% endfor %}
                   </div>
               </div>
-          </div>
+          {% endfor %}
       </div>
 
       <div class="ai-chat hidden">

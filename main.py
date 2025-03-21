@@ -8,9 +8,10 @@ alphabet = string.ascii_letters + string.digits + '_'
 
 app = Flask(__name__)
 
-results = {"Магниторезистентный цифровой вольтметр": [Item("https://www.chipdip.ru/product0/8031325911", "Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
-           "Миллиомметр": [Item("https://www.chipdip.ru/product/dt-5302", "DT-5302, Миллиомметр", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
+results = {"Магниторезистентный цифровой вольтметр": [Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
+           "Миллиомметр": [Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
 
+print(results)
 
 def check_downloads():
     if not os.path.exists("downloads"):
@@ -30,7 +31,7 @@ def search():
     user_id = request.cookies.get("user_id")
     if not user_id:
         return render_template('not_cookie.html')
-    return render_template('search.html')
+    return render_template('search.html', titles=list(results), results=results, length=len(results))
     # items = get_chipdip(query)
     # return render_template('search.html', len=len(items), Items=items)
 
