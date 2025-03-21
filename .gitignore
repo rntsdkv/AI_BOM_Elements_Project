@@ -2,3 +2,4 @@
 .DS_Store
 /downloads/
 /vectorization/
+config.py
