@@ -8,6 +8,11 @@ alphabet = string.ascii_letters + string.digits + '_'
 app = Flask(__name__)
 
 
+def check_downloads():
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
+
+
 @app.route("/")
 def index():
     user_id = ''.join(secrets.choice(alphabet) for i in range(20))
@@ -34,11 +39,11 @@ def upload_file():
     print(request.cookies.get("user_id"))
     print(file.filename)
 
+    check_downloads()
     file_path = os.path.join("downloads", request.cookies.get("user_id") + '.' + file.filename.split('.')[-1])
     file.save(file_path)
 
     return jsonify({"message": "Файл успешно загружен", "filename": file.filename})
-
 
 
 @app.route("/downloads")
@@ -47,4 +52,5 @@ def downloads():
 
 
 if __name__ == "__main__":
+    check_downloads()
     app.run(host="localhost", port=3550, debug=True)
