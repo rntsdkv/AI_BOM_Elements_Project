@@ -13,6 +13,7 @@ results = {"Магниторезистентный цифровой вольтм
 
 print(results)
 
+
 def check_downloads():
     if not os.path.exists("downloads"):
         os.makedirs("downloads")
