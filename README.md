@@ -8,6 +8,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Пререквизиты
+- [ ] Создать файл `config.py` в папке проекта с кодом `Grock="YOUR_GROCK_API_KEY"`
+
 ## Запуск
 ```
 

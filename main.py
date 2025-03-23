@@ -89,4 +89,5 @@ def downloads():
 if __name__ == "__main__":
     check_downloads()
     sql.create_messages_table()
-    app.run(host="localhost", port=3550, debug=True)
+    # app.run(host="localhost", port=3550, debug=True)
+    app.run(host="0.0.0.0", port=3550, debug=True)
