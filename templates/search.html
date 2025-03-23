@@ -3,14 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/search.css">
 </head>
 <body>
-  {%for item, value in Items.items()%}
-    <div class="item">
-        <h1 class="item-name">{{value['name']}}</h1>
-        <img class="item-image" src={{value['image_url']}}>
-    </div>
-  {%endfor%}
+  <div class="search">
+      <header>
+          <span class="title unselectable">Ваши элементы</span>
+          <div class="header-buttons">
+              <div class="results-button active unselectable">Результат</div>
+              <div class="ai-chat-button unselectable">AI-чат</div>
+          </div>
+      </header>
+
+      <div class="results">
+          {% for i in range(length) %}
+              <div class="item">
+                  <div class="item-header">
+                      <div class="item-number unselectable">{{i+1}}</div>
+                      <span class="item-name">{{titles[i]}}</span>
+                  </div>
+
+                  <div class="item-results">
+                      {% for item in results[titles[i]] %}
+                          <div class="item-result">
+                              <div class="item-image-box">
+                                  <img class="item-image" src={{item.image}} alt="">
+                              </div>
+                              <div class="item-text-box">
+                                  <a class="item-text" href={{item.url}}>{{item.name}}</a>
+                              </div>
+                          </div>
+                      {% endfor %}
+                  </div>
+              </div>
+          {% endfor %}
+      </div>
+
+      <div class="ai-chat hidden">
+          <div class="messages">
+              <div class="user-message-box">
+                  <div class="user-message">
+                      User Message
+                  </div>
+              </div>
+
+              <div class="ai-message-box">
+                  <div class="ai-message">
+                      AI Message
+                  </div>
+              </div>
+          </div>
+
+          <div class="send">
+              <textarea class="text-edit" placeholder="Введите сообщение"></textarea>
+              <div class="send-button-box">
+                  <img id="send-button" class="send-button inactive" src="../static/send-button.svg" alt="">
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script src="../static/search.js"></script>
 </body>
 </html>

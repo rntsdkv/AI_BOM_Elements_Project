@@ -9,6 +9,80 @@
     <link rel="stylesheet" href="../static/downloads.css">
 </head>
 <body>
-  <h1>Здесь будут шаблоны для BOM</h1>
+    <div class="frame">
+        <header>
+            <h1 class="title unselectable">Шаблоны спецификации</h1>
+            <a class="to-home unselectable" href="/">На главную</a>
+        </header>
+
+        <div class="content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>URL (optional)</th>
+                        <th>Name</th>
+                        <th>Manufacturer (optional)</th>
+                        <th>Characteristics (optional)</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>/product0/8005776776</td>
+                        <td>Стабилизатор напряжения</td>
+                        <td></td>
+                        <td>Напряжение: 5V, Входное напряжение: 6..35V, Ток: 1A, Температура: -20°C - +85°C</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td>Резистор</td>
+                        <td>SnailLabs</td>
+                        <td>Сопротивление: 100 Ом, Мощность: 25 Вт</td>
+                        <td>10000</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td>STM32</td>
+                        <td>STMicroelectronics</td>
+                        <td></td>
+                        <td>1000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td>SA7.0CA</td>
+                        <td></td>
+                        <td>Breakdown Voltage:	7.78 V
+                            Clamping Voltage:	12 V
+                            Factory Pack Quantity: Factory Pack Quantity:	4000</td>
+                        <td>30</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td></td>
+                        <td>Liquid Level Sensor</td>
+                        <td></td>
+                        <td></td>
+                        <td>6</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bottom">
+            <span class="unselectable">Скачать</span>
+            <div class="buttons">
+                <a class="button unselectable" id="csv" href="../static/bom_examples/bom_example.csv">.csv</a>
+                <a class="button unselectable" id="xslx" href="../static/bom_examples/bom_example.xlsx">.xlsx</a>
+                <a class="button unselectable" id="txt" href="../static/bom_examples/bom_example.txt">.txt</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
