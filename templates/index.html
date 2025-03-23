@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Подбор элементной базы по BOM-спецификации</title>
+    <title>Подбор элементной базы</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
@@ -16,28 +16,21 @@
 <!--    <input type="file">-->
 
     <div class="window">
-        <span class="title">
-            Подбор элементной базы
-        </span>
+        <span class="title unselectable">Подбор элементной базы</span>
 
         <div class="input-frame" id="drop-area">
             <div class="subframe"></div>
             <div class="subframe">
-                <span class="frame-title">
-                    Перетащите сюда файл спецификации
-                </span>
-                <span class="frame-subtitle">
-                    .xlsx, .csv, .txt
-                </span>
-                <a class="load-button hidden" id="load-button" href="/search" hidden>
-                    Начать поиск
-                </a>
+                <span class="frame-title unselectable">Перетащите сюда файл спецификации</span>
+
+                <span class="frame-subtitle unselectable">.xlsx, .csv, .txt</span>
+
+                <a class="load-button hidden unselectable" id="load-button" href="/search" hidden>Начать поиск</a>
+
                 <input id="input-file" type="file" accept=".txt,.csv,.xlsx" hidden>
             </div>
             <div class="subframe">
-                <a class="download-example" href="/downloads">
-                    Загрузить шаблон спецификации
-                </a>
+                <a class="download-example unselectable" href="/downloads">Загрузить шаблон спецификации</a>
             </div>
         </div>
     </div>

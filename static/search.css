@@ -391,3 +391,10 @@ header {
 .inactive {
   opacity: 0.6;
 }
+
+.unselectable {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none !important;
+}

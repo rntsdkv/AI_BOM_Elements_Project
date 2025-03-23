@@ -11,12 +11,10 @@
 <body>
   <div class="search">
       <header>
-          <span class="title">
-              Ваши элементы
-          </span>
+          <span class="title unselectable">Ваши элементы</span>
           <div class="header-buttons">
-              <div class="results-button active">Результат</div>
-              <div class="ai-chat-button">AI-чат</div>
+              <div class="results-button active unselectable">Результат</div>
+              <div class="ai-chat-button unselectable">AI-чат</div>
           </div>
       </header>
 
@@ -24,7 +22,7 @@
           {% for i in range(length) %}
               <div class="item">
                   <div class="item-header">
-                      <div class="item-number">{{i+1}}</div>
+                      <div class="item-number unselectable">{{i+1}}</div>
                       <span class="item-name">{{titles[i]}}</span>
                   </div>
 
@@ -47,36 +45,6 @@
       <div class="ai-chat hidden">
           <div class="messages">
               <div class="user-message-box">
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
-                  <div class="user-message">
-                      User Message
-                  </div>
                   <div class="user-message">
                       User Message
                   </div>
