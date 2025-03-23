@@ -313,7 +313,7 @@ def llm_invoke(message_id, query):
 
 
 if __name__ == "__main__":
-    print(search_BOM('bom_examples/bom_example.csv'))
+    print(search_BOM('static/bom_examples/bom_example.csv'))
 
     # Генератор красивого отчёта
 #    chip = get_chipdip("Стабилизатор напряжения 5V; 6V-36V input")
