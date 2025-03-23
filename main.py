@@ -1,8 +1,11 @@
-from flask import Flask, render_template, jsonify, request, make_response
+import datetime
+
+from flask import Flask, render_template, jsonify, request, make_response, Response
 from functions import *
 from item import Item
 import string
 import secrets
+import sql
 
 alphabet = string.ascii_letters + string.digits + '_'
 
@@ -46,14 +49,36 @@ def upload_file():
     if file.filename == "":
         return jsonify({'error': 'Файл не выбран'}), 400
 
-    print(request.cookies.get("user_id"))
-    print(file.filename)
-
     check_downloads()
     file_path = os.path.join("downloads", request.cookies.get("user_id") + '.' + file.filename.split('.')[-1])
     file.save(file_path)
 
     return jsonify({"message": "Файл успешно загружен", "filename": file.filename})
+
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    data = request.form.to_dict()
+    print(data)
+    message_id = sql.add_message(datetime.datetime.now(), data['user_id'], data['text'])
+    llm_invoke(message_id, data['text'])
+    if message_id:
+        return jsonify({"id": message_id, "status_code": 200})
+    return jsonify({"status_code": 400})
+
+
+@app.route('/get_message_answer', methods=['GET'])
+def get_message_answer():
+    try:
+        user_id = request.args.get("user_id")
+        message_id = request.args.get("message_id")
+    except:
+        return Response(status=500)
+    answer = sql.get_message_answer(user_id, message_id)
+
+    if answer is None:
+        return jsonify({"has_answer": "false"})
+    return jsonify({"has_answer": "true", "text": answer})
 
 
 @app.route("/downloads")
@@ -63,4 +88,5 @@ def downloads():
 
 if __name__ == "__main__":
     check_downloads()
+    sql.create_messages_table()
     app.run(host="localhost", port=3550, debug=True)

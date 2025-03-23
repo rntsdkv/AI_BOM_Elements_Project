@@ -13,6 +13,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
 
+import sql
+
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/111.0.0.0 Safari/537.36'}
 
@@ -296,6 +298,19 @@ def search_BOM(path):
 
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
+
+
+"""
+ТЕСТОВАЯ ФУНКЦИЯ, ПОТОМ УБРАТЬ
+"""
+def llm_invoke(message_id, query):
+    llm = init_chat_model("llama3-8b-8192", model_provider="groq")
+    answer = llm.invoke(f"""
+    Поговори с пользователем, он написал:
+    {query}
+    """).content
+    sql.add_message_answer(message_id, answer)
+
 
 if __name__ == "__main__":
     print(search_BOM('bom_examples/bom_example.csv'))
