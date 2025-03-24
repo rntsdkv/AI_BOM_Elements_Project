@@ -363,6 +363,7 @@ header {
   justify-content: flex-end;
   align-items: center;
   padding: 0;
+  gap: 8px;
 }
 
 .send-button {
