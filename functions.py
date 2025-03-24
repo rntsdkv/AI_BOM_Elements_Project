@@ -4,15 +4,10 @@ import pandas as pd
 import os
 import math
 import numpy as np
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS, InMemoryVectorStore
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 from langchain.chat_models import init_chat_model
-from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
-from item import Item
 import item
 
 import sql
@@ -23,13 +18,6 @@ headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleW
 if not os.environ.get("GROQ_API_KEY"):
     os.environ["GROQ_API_KEY"] = config.Grock
 
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=100,
-    length_function=len
-)
-
-emb_model = HuggingFaceEmbeddings(model_name="cointegrated/LaBSE-en-ru")
 
 
 def capcha_fix(url):
@@ -159,43 +147,8 @@ def download_file(url, name=None):
 # print(download_file("https://static.chipdip.ru/lib/046/DOC003046561.pdf"))
 
 
-def vectorize_file(path):
-    '''
-    Позволяет сплитовать и векторизовать pdf-файлы
-    :param path: путь к файлу
-    :return: путь к векторизованному файлу
-    '''
-    file_name = path.split('/')[-1]
-    pdf_loader = PyPDFLoader(path)
-    docs = pdf_loader.load()
-    text_content = [doc.page_content for doc in docs]
 
-    splitted_document = splitter.create_documents(text_content)
-
-    vector_store = FAISS.from_documents(splitted_document, emb_model)
-    vector_store.save_local(os.path.join('vectorization', file_name))
-
-    return os.path.join('vectorization', file_name)
-
-
-# print(vectorize_file("downloads/DOC003046561.pdf"))
-
-
-def get_similarity_from_vectorization(path, query, k=3):
-    '''
-    Позволяет получить наиболее похожие части векторизованного файла на запрос
-    :param path: путь к векторизованному файлу (dir)
-    :param query: запрос
-    :param k: количество возвращаемых результатов
-    :return:
-    '''
-    vector_store = FAISS.load_local(path, emb_model, allow_dangerous_deserialization=True)
-    content = [doc.page_content for doc in vector_store.similarity_search(query, k=k)]
-    return content
-
-
-# print(get_similarity_from_vectorization("vectorization/DOC003046561.pdf", "shutdown"))
-
+# print(get_similarity_from_vectorization("vectorization/DOC
 
 def parse_bom(file: str):
     if file.endswith('.xlsx'):
@@ -223,8 +176,20 @@ def read_data(data):
     result = data.set_index("name").to_dict(orient="index")
     return result
 
+def re_search(data, comment):
+    it = data[1]
+    title = data[0]
+    object = dict()
+    object["characteristics"] = it.params
+    object["manufacturer"]=it.manufacturer
+    object["quantity"]=it.quantity
+    result = llm_search(object, title, comment)
 
-def llm_search(object, key):
+    i = title
+    if(result.get("name", None) != None):
+        return (i, item.Item(result["name"], 'https://www.chipdip.ru'+result["href"], result["price"], result["image_url"], result["description"], result["params"], result["availability"], it.manufacturer, it.characteristics, it.quantity))
+
+def llm_search(object, key, comment="Найди самый подходящий компанент"):
     prompt = """
     Если гдето в моём сообщении будешь видеть nan - значит там пусто
 
@@ -232,6 +197,11 @@ def llm_search(object, key):
     Вот от такой фабрики: {manufacturer}
     У него обязательно должны быть вот такие характеристики:
     {characteristics}
+
+    Учти, что пользователь дал свой коментарий и выполнить эти требования ты обязан:
+    -----
+    {comment}
+    -----
 
     Я ищю это всё в магазине, на их сайте есть поиск, что я должен ввести, не используя фильтры, чтобы нашёлся нужный мне компанент.
 
@@ -258,8 +228,8 @@ def llm_search(object, key):
     ).format()
     prompt = PromptTemplate(
         template=prompt,
-        input_variables=["name", "manufacturer", "characteristics"],
-    ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics)
+        input_variables=["name", "manufacturer", "characteristics", "comment"],
+    ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics, comment=comment)
     llm = init_chat_model("deepseek-r1-distill-llama-70b", model_provider="groq")
     llm2 = init_chat_model("llama3-8b-8192", model_provider="groq")
     search = llm2.invoke("Ты думал вот так:" + llm.invoke(
@@ -281,6 +251,12 @@ def llm_search(object, key):
     Вот от такой фабрики: {manufacturer}
     У него обязательно должны быть вот такие характеристики:
     {characteristics}
+
+    
+    Учти, что пользователь дал свой коментарий и выполнить эти требования ты обязан:
+    ------
+    {comment}
+    ------
 
     Я ищю это всё в магазине, на их сайте есть поиск, что я должен ввести, не используя фильтры, чтобы нашёлся нужный мне компанент.
 
@@ -327,8 +303,8 @@ def llm_search(object, key):
                 )
                 prompt = PromptTemplate(
                     template=prompt_template,
-                    input_variables=["name", "manufacturer", "characteristics","name_se", "manufacturer_se", "characteristics_se","name_se2", "manufacturer_se2", "characteristics_se2"],
-                ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics, name_se=chip_availability[i]['name'], manufacturer_se=chip_availability[i]['description'], characteristics_se=prompt_char1.format(), name_se2=chip_availability[j]['name'], manufacturer_se2=chip_availability[j]['description'], characteristics_se2=prompt_char2.format())
+                    input_variables=["name", "manufacturer", "characteristics","name_se", "manufacturer_se", "characteristics_se","name_se2", "manufacturer_se2", "characteristics_se2", "comment"],
+                ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics, name_se=chip_availability[i]['name'], manufacturer_se=chip_availability[i]['description'], characteristics_se=prompt_char1.format(), name_se2=chip_availability[j]['name'], manufacturer_se2=chip_availability[j]['description'], characteristics_se2=prompt_char2.format(), comment=comment)
                 res = llm.invoke(prompt).content
                 vibor = lambda : llm2.invoke("Выдели из этого рассуждения более подходящий модуль и в ответ верни мне 1 или 2: "+res + "\n\nВ ОТВЕТ ВЕРНИ МНЕ ТОЛЬКО 1 или 2, какой из модулей подходит лучше: ").content
                 answers = []
@@ -351,7 +327,6 @@ def llm_search(object, key):
 def search_BOM(path):
     data = read_data(parse_bom(path))
     result = {}
-    print(data)
     for i in data.keys():
         if (data[i]["url"] != data[i]["url"]):
             req = llm_search(data[i], i).copy()
@@ -360,15 +335,6 @@ def search_BOM(path):
             result[i]["history"].append({"type": "sys", 'msg': "Найдено по характеристикам в таблице"})
         else:
             req = get_chipdip_item_info(data[i]["url"])
-            print("\\/ " * 20)
-            print("Название: ", req["name"])
-            print("Описание: ", req["description"])
-            print("Наличие: ", req["availability"])
-            print("\nПараметры\n", "-" * 30)
-            for j in req["params"].keys():
-                print(j, ": ", req["params"][j])
-            print("/\\ " * 20)
-            print("\n\n")
             result[i] = req.copy()
             result[i]["history"] = result[i].get("history", list())
             result[i]["history"].append({"type": "sys", 'msg': "Взято по ссылке из таблицы"})
@@ -381,9 +347,10 @@ def search_BOM(path):
     result_final = []
     for i in result.keys():
         if(result[i].get("name", None) != None):
-            result_final.append((i, Item(result[i]["name"], 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"])))
+            result_final.append((i, item.Item(result[i]["name"], 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"], data[i]["manufacturer"], data[i]["characteristics"], data[i]["quantity"])))
 
     return result_final
+
 
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
@@ -410,17 +377,8 @@ def llm_invoke(message_id, query):
 
 
 if __name__ == "__main__":
-    print(search_BOM('/Users/mihailkluskin/Desktop/HSE/ИИ /Проект/AI_BOM_Elements_Project/test.csv'))
-
-    # Генератор красивого отчёта
-#    chip = get_chipdip("Стабилизатор напряжения 5V; 6V-36V input")
-#    print("\n"*5)
-#    for i in chip.keys():
-#        print(i)
-#        print("Название: ",chip[i]["name"])
-#        print("Описание: ",chip[i]["description"])
-#        print("Наличие: ", chip[i]["availability"])
-#        print("\nПараметры\n","-"*30)
-#        for j in chip[i]["params"].keys():
-#            print(j, ": ", chip[i]["params"][j])
-#        print("\n\n")
+    iiiiii = search_BOM('/Users/mihailkluskin/Desktop/HSE/ИИ /Проект/AI_BOM_Elements_Project/test.csv')[0]
+    print(iiiiii[1].url)
+    print(iiiiii[1].answer_question("Какой тип корпуса у этого стабилизатора?"))
+    print(re_search(iiiiii, "Найди в корпусе TO-96"))
+    
