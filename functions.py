@@ -13,6 +13,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
 from item import Item
+import item
 
 import sql
 
@@ -379,12 +380,19 @@ def search_BOM(path):
     
     result_final = []
     for i in result.keys():
-        result_final.append(i, item.Item(i, 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"], result[i]["availability"]))
+        result_final.append((i, Item(i, 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"])))
 
     return result_final
 
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
+
+def find_file(user_id):
+    for root, dirs, files in os.walk("downloads"):
+        for file in files:
+            if user_id in file:
+                return os.path.join('downloads', file)
+
 
 
 """

@@ -2,7 +2,7 @@ from item import Item
 
 
 class Result:
-    def __init__(self, titles: list[str], items: list[Item]):
+    def __init__(self, titles=[], items=[]):
         self.list_of_items = []
         for i in range(len(titles)):
             self.list_of_items.append((titles[i], items[i]))
