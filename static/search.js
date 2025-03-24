@@ -8,9 +8,13 @@ var textArea = document.querySelector(".text-edit");
 var sendBox = document.querySelector(".send");
 var commentItem  = document.querySelector(".item-comment");
 var sendButton = document.getElementById("send-button");
+var regenerateButton = document.getElementById("regenerate-button");
 var messages = document.querySelector(".messages");
 
 var reasoning = false;
+var want_to_regenerate = false;
+var selected_item_id = 0;
+
 getResult();
 
 resultsButton.addEventListener("click", function() {moveToResults()});
@@ -26,30 +30,42 @@ function moveToResults() {
 }
 
 function moveToMessages(item_id=0) {
+    selected_item_id = item_id;
     resultsButton.classList.remove("active");
     blockResults.classList.add("hidden");
 
     aiChatButton.classList.add("active");
     blockChat.classList.remove("hidden");
     if (item_id !== 0) {
+        regenerateButton.classList.remove("hidden");
+        want_to_regenerate = true;
         commentItem.classList.remove("hidden");
         console.log("title_"+item_id);
         let item = document.getElementById("title_"+item_id);
         console.log(item);
         commentItem.textContent = item.textContent;
+    } else {
+        regenerateButton.classList.add("hidden");
+        commentItem.classList.add("hidden");
     }
 }
 
 function onCommentButtonClick(commentButton) {
-    moveToMessages(item_id=this.id);
+    moveToMessages(this.id);
     console.log(this.id);
 }
 
 textArea.addEventListener("input", function() {
-    if (textArea.value && !reasoning) {
-        sendButton.classList.remove("inactive");
+    if (textArea.value) {
+        if (!reasoning) {
+            sendButton.classList.remove("inactive");
+        } else {
+            sendButton.classList.add("inactive");
+        }
+        regenerateButton.classList.remove("inactive");
     } else {
         sendButton.classList.add("inactive");
+        regenerateButton.classList.add("inactive");
     }
 });
 
@@ -221,4 +237,16 @@ function insertResult(result) {
     commentButtons.forEach(commentButton => {
         commentButton.addEventListener("click", onCommentButtonClick, this);
     })
+}
+
+regenerateButton.addEventListener("click", function() {
+    regenerateItem();
+});
+
+function regenerateItem() {
+    let user_id = getUserId();
+    fetch(`/regenerate?user_id=${user_id}&selected_item_id=${selected_item_id}`, {
+        method: "GET",
+    })
+        .then(res => res.json());
 }
