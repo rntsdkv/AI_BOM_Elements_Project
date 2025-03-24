@@ -13,6 +13,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
 from item import Item
+import item
+
 import sql
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -385,6 +387,13 @@ def search_BOM(path):
 
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
+
+def find_file(user_id):
+    for root, dirs, files in os.walk("downloads"):
+        for file in files:
+            if user_id in file:
+                return os.path.join('downloads', file)
+
 
 
 
