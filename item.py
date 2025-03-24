@@ -1,9 +1,10 @@
 class Item:
-    def __init__(self, name, url, image="", description="", characteristics=None, availability=0):
+    def __init__(self, name, url, price=0, image="", description="", characteristics=None, availability=0):
         if characteristics is None:
             characteristics = dict()
         self.name: str = name
         self.url: str = url
+        self.price: int = price
         self.image: str = image
         self.description: str = description
         self.characteristics: dict = characteristics
@@ -14,6 +15,9 @@ class Item:
 
     def set_url(self, url):
         self.url = url
+
+    def set_price(self, price):
+        self.price = price
 
     def set_image(self, src):
         self.image = src
@@ -38,6 +42,7 @@ class Item:
         try:
             self.name = dictionary['name']
             self.url = dictionary['url']
+            self.price = dictionary['price']
             self.image = dictionary['image'] if 'image' in keys else ""
             self.description = dictionary['description'] if 'description' in keys else ""
             self.characteristics = dictionary['characteristics'] if 'characteristics' in keys else ""
@@ -48,6 +53,7 @@ class Item:
     def as_dict(self):
         return {'name': self.name,
                 'url': self.url,
+                'price': self.price,
                 'image': self.image,
                 'description': self.description,
                 'characteristics': self.characteristics,
