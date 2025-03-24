@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Flask, render_template, jsonify, request, make_response, Response
+from flask import Flask, render_template, jsonify, request, make_response, Response, send_file
 from functions import *
 from item import Item
 import string
@@ -11,6 +11,7 @@ from result import Result
 alphabet = string.ascii_letters + string.digits + '_'
 
 app = Flask(__name__)
+
 
 def check_folders():
     if not os.path.exists("downloads"):
@@ -28,6 +29,7 @@ def index():
 
 results = {"Магниторезистентный цифровой вольтметр": [Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
            "Миллиомметр": [Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
+
 
 @app.route("/search")
 def search():
@@ -49,7 +51,7 @@ def upload_file():
     if file.filename == "":
         return jsonify({'error': 'Файл не выбран'}), 400
 
-    check_downloads()
+    check_folders()
     file_path = os.path.join("downloads", request.cookies.get("user_id") + '.' + file.filename.split('.')[-1])
     file.save(file_path)
 
@@ -101,8 +103,9 @@ def regenerate():
     selected_item_id = int(request.args.get("selected_item_id"))
     text = request.args.get("text")
     result: Result = sql.get_items(user_id)
-    # new_item = запрос мише
-    # result = result.replace_item(selected_item_id - 1, new_item).as_list()
+    new_item = re_search(result.list_of_items[selected_item_id-1], text)[1]
+    result = result.replace_item(selected_item_id - 1, new_item)
+    sql.set_items(user_id, result)
     return jsonify({"result": result})
 
 
@@ -111,8 +114,16 @@ def downloads():
     return render_template('downloads.html')
 
 
+@app.route("/install")
+def install():
+    user_id = request.args.get("user_id")
+    result: Result = sql.get_items(user_id)
+    result.generate_report(user_id)
+    return send_file("uploads/" + user_id + ".xlsx", as_attachment=True)
+
+
 if __name__ == "__main__":
-    check_downloads()
+    check_folders()
     sql.create_items_table()
     sql.create_messages_table()
     app.run(host="localhost", port=3550, debug=True)

@@ -1,6 +1,12 @@
 from item import Item
 import pandas as pd
-from main import check_folders
+import os
+
+
+def check_folders():
+    if not os.path.exists("uploads"):
+        os.makedirs("uploads")
+
 
 class Result:
     def __init__(self, titles=[], items=[]):
@@ -37,7 +43,7 @@ class Result:
             data.append((item.name, item.url, item.description, item.price, item.characteristics))
         print(data)
         df = pd.DataFrame(data=data, columns=["name", "url", "description", "price", "characteristics"])
-        df.to_excel("uploads/" + user_id)
+        df.to_excel("/uploads/" + user_id + ".xlsx")
         return df
 
 

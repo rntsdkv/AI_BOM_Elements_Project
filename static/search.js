@@ -264,5 +264,17 @@ function regenerateItem() {
 }
 
 installButton.addEventListener("click", function() {
-    fetch(`/install?user_id=${user_id}`, {method: "GET"}).then(r => r.json());
-})
+    fetch(`/install`)
+        .then(response => response.blob())  // Преобразуем ответ в Blob
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);  // Создаём URL для Blob
+            const a = document.createElement('a');  // Создаём ссылку
+            a.href = url;
+            a.download = 'report.xlsx';  // Имя файла при скачивании
+            document.body.appendChild(a);
+            a.click();  // Кликаем по ссылке для скачивания
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  // Очищаем память
+        })
+        .catch(error => console.error('Ошибка скачивания:', error));
+});
