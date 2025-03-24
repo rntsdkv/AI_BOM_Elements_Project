@@ -260,7 +260,10 @@ function regenerateItem() {
     fetch(`/regenerate?user_id=${user_id}&selected_item_id=${selected_item_id}&text=${textArea.value}`, {
         method: "GET",
     })
-        .then(res => res.json());
+        .then(res => res.json())
+        .then(result => {
+            insertResult(result.result);
+        });
 }
 
 installButton.addEventListener("click", function() {
