@@ -12,6 +12,7 @@ from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
+from item import Item
 
 import sql
 

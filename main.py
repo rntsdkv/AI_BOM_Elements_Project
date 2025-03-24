@@ -6,16 +6,11 @@ from item import Item
 import string
 import secrets
 import sql
+from result import Result
 
 alphabet = string.ascii_letters + string.digits + '_'
 
 app = Flask(__name__)
-
-results = {"Магниторезистентный цифровой вольтметр": [Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
-           "Миллиомметр": [Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
-
-print(results)
-
 
 def check_downloads():
     if not os.path.exists("downloads"):
@@ -29,6 +24,8 @@ def index():
     response.set_cookie("user_id", user_id)
     return response
 
+results = {"Магниторезистентный цифровой вольтметр": [Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")],
+           "Миллиомметр": [Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")]}
 
 @app.route("/search")
 def search():
@@ -80,6 +77,17 @@ def get_message_answer():
         return jsonify({"has_answer": "false"})
     return jsonify({"has_answer": "true", "text": answer})
 
+
+# results = {"Магниторезистентный цифровой вольтметр": [],
+#            "Миллиомметр": []}
+
+@app.route('/get_result', methods=['GET'])
+def get_result():
+    user_id = request.args.get("user_id")
+    item1 = Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")
+    item2 = Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")
+    result = Result([("Магниторезистентный цифровой вольтметр", item1), ("Миллиометр", item2)]).as_list()
+    return jsonify({"result": result})
 
 @app.route("/downloads")
 def downloads():
