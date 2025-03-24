@@ -12,9 +12,11 @@ alphabet = string.ascii_letters + string.digits + '_'
 
 app = Flask(__name__)
 
-def check_downloads():
+def check_folders():
     if not os.path.exists("downloads"):
         os.makedirs("downloads")
+    if not os.path.exists("uploads"):
+        os.makedirs("uploads")
 
 
 @app.route("/")
@@ -111,5 +113,6 @@ def downloads():
 
 if __name__ == "__main__":
     check_downloads()
+    sql.create_items_table()
     sql.create_messages_table()
     app.run(host="localhost", port=3550, debug=True)

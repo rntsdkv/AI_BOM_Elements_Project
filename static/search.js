@@ -1,4 +1,5 @@
 var title = document.querySelector('.title');
+var installButton = document.querySelector('.install-button');
 var resultsButton = document.querySelector(".results-button");
 var aiChatButton = document.querySelector(".ai-chat-button");
 var blockResults = document.querySelector(".results");
@@ -59,10 +60,11 @@ textArea.addEventListener("input", function() {
     if (textArea.value) {
         if (!reasoning) {
             sendButton.classList.remove("inactive");
+            regenerateButton.classList.remove("inactive");
         } else {
             sendButton.classList.add("inactive");
+            regenerateButton.classList.add("inactive");
         }
-        regenerateButton.classList.remove("inactive");
     } else {
         sendButton.classList.add("inactive");
         regenerateButton.classList.add("inactive");
@@ -244,9 +246,23 @@ regenerateButton.addEventListener("click", function() {
 });
 
 function regenerateItem() {
+    reasoning = true;
+    sendButton.classList.add("inactive");
+    regenerateButton.classList.add("inactive");
+
     let user_id = getUserId();
+    let text = textArea.value;
+
+    textArea.value = "";
+
+    addMessageToHTML("user", `Запрос по ${commentItem.textContent}\n${text}`);
+
     fetch(`/regenerate?user_id=${user_id}&selected_item_id=${selected_item_id}&text=${textArea.value}`, {
         method: "GET",
     })
         .then(res => res.json());
 }
+
+installButton.addEventListener("click", function() {
+    fetch(`/install?user_id=${user_id}`, {method: "GET"}).then(r => r.json());
+})
