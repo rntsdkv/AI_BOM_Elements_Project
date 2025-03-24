@@ -32,7 +32,8 @@ def search():
     user_id = request.cookies.get("user_id")
     if not user_id:
         return render_template('not_cookie.html')
-    return render_template('search.html', titles=list(results), results=results, length=len(results))
+    return render_template('search.html', titles=[], results=[], length=0)
+    # return render_template('search.html', titles=list(results), results=results, length=len(results))
     # items = get_chipdip(query)
     # return render_template('search.html', len=len(items), Items=items)
 
@@ -83,6 +84,8 @@ def get_message_answer():
 
 @app.route('/get_result', methods=['GET'])
 def get_result():
+    print("НОВЫЙ ЗАПРОС")
+
     user_id = request.args.get("user_id")
     file = find_file(user_id)
     result = Result().from_list(search_BOM(file)).as_list()

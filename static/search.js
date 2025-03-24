@@ -1,3 +1,4 @@
+var title = document.querySelector('.title');
 var resultsButton = document.querySelector(".results-button");
 var aiChatButton = document.querySelector(".ai-chat-button");
 var blockResults = document.querySelector(".results");
@@ -10,6 +11,7 @@ var sendButton = document.getElementById("send-button");
 var messages = document.querySelector(".messages");
 
 var reasoning = false;
+getResult();
 
 resultsButton.addEventListener("click", function() {moveToResults()});
 
@@ -36,11 +38,6 @@ function moveToMessages(item_id=0) {
         console.log(item);
         commentItem.textContent = item.textContent;
     }
-}
-
-for (let i = 0; i < commentButtons.length; i++) {
-    var commentButton = commentButtons[i];
-    commentButton.addEventListener("click", onCommentButtonClick, commentButton);
 }
 
 function onCommentButtonClick(commentButton) {
@@ -107,7 +104,7 @@ function sendMessage(messageText) {
                             clearInterval(timer);
                         }
                     });
-            }, 3000);
+            }, 2000);
         })
         .catch(error => console.error("Ошибка отправки:", error));
 }
@@ -141,6 +138,9 @@ function getUserId() {
 
 function getResult() {
     let user_id = getUserId();
+
+    title.textContent = "Загрузка...";
+
     fetch(`/get_result?user_id=${user_id}`, {
         method: 'GET',
     })
@@ -148,13 +148,77 @@ function getResult() {
         .then(result => {
             console.log(result);
             insertResult(result.result);
+            title.textContent = "Ваши элементы";
         });
+
 }
 
 function insertResult(result) {
     for (let i = 0; i < result.length; i++) {
-        let id = i;
         let title = result[i][0];
         let item = result[i][1];
+        console.log(i, title);
+        console.log(item);
+
+        let itemHTML = document.createElement("div");
+        itemHTML.classList.add("item");
+
+        let itemHeader = document.createElement("div");
+        itemHeader.classList.add("item-header");
+
+        let itemNumber = document.createElement("div");
+        itemNumber.classList.add("item-number");
+        itemNumber.textContent = i+1;
+        let itemName = document.createElement("span");
+        itemName.classList.add("item-name");
+        itemName.textContent = title;
+        itemName.id = "title_" + (i+1);
+        let commentButton = document.createElement("img");
+        commentButton.classList.add("comment-button");
+        commentButton.src = "../static/comment-button.svg";
+        commentButton.alt = "";
+        commentButton.id = i+1;
+
+        itemHeader.appendChild(itemNumber);
+        itemHeader.appendChild(itemName);
+        itemHeader.appendChild(commentButton);
+
+        let itemResults = document.createElement('div');
+        itemResults.classList.add("item-results");
+        let itemResult = document.createElement("div");
+        itemResult.classList.add("item-result");
+        let itemResultContent = document.createElement("div");
+        itemResultContent.classList.add("item-result-content");
+        let itemImageBox = document.createElement("img");
+        itemImageBox.classList.add("item-image-box");
+        let itemImage = document.createElement("img");
+        itemImage.classList.add("item-image");
+        itemImage.src = item["image"];
+        itemImage.alt = "";
+        itemImageBox.appendChild(itemImage);
+
+        let itemTextBox = document.createElement("div");
+        let itemText = document.createElement("a");
+        itemText.classList.add("item-text");
+        itemText.href = item["url"];
+        itemText.textContent = item["name"];
+        itemTextBox.appendChild(itemText);
+
+        itemResultContent.appendChild(itemImageBox);
+        itemResultContent.appendChild(itemTextBox);
+
+        itemResult.appendChild(itemResultContent);
+
+        itemResults.appendChild(itemResult);
+
+        itemHTML.appendChild(itemHeader);
+        itemHTML.appendChild(itemResults);
+
+        blockResults.appendChild(itemHTML);
     }
+
+    commentButtons = document.querySelectorAll(".comment-button");
+    commentButtons.forEach(commentButton => {
+        commentButton.addEventListener("click", onCommentButtonClick, this);
+    })
 }
