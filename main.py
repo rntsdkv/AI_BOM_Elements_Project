@@ -90,10 +90,19 @@ def get_result():
     file = find_file(user_id)
     result = Result().from_list(search_BOM(file)).as_list()
     print(result)
-    # item1 = Item("Конструктор прибор, вольтметр+амперметр цифровой, SVAL0013PW", "https://www.chipdip.ru/product0/8031325911", image="https://static.chipdip.ru/lib/304/DOC045304074.jpg")
-    # item2 = Item("DT-5302, Миллиомметр", "https://www.chipdip.ru/product/dt-5302", image="https://static.chipdip.ru/lib/249/DOC005249889.jpg")
-    # result = Result([("Магниторезистентный цифровой вольтметр", item1), ("Миллиометр", item2)]).as_list()
     return jsonify({"result": result})
+
+
+@app.route('/regenerate', methods=['GET'])
+def regenerate():
+    user_id = request.args.get("user_id")
+    selected_item_id = int(request.args.get("selected_item_id"))
+    text = request.args.get("text")
+    result: Result = sql.get_items(user_id)
+    # new_item = запрос мише
+    # result = result.replace_item(selected_item_id - 1, new_item).as_list()
+    return jsonify({"result": result})
+
 
 @app.route("/downloads")
 def downloads():

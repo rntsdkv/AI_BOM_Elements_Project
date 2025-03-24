@@ -25,6 +25,6 @@ class Result:
         list_of_items = [(title, item.as_dict()) for title, item in self.list_of_items]
         return list_of_items
 
-    def from_list(self, list_of_items: list[(str, Item)]):
+    def from_list(self, list_of_items: list):
         self.list_of_items = list_of_items
         return self

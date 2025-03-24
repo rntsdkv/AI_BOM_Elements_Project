@@ -245,7 +245,7 @@ regenerateButton.addEventListener("click", function() {
 
 function regenerateItem() {
     let user_id = getUserId();
-    fetch(`/regenerate?user_id=${user_id}&selected_item_id=${selected_item_id}`, {
+    fetch(`/regenerate?user_id=${user_id}&selected_item_id=${selected_item_id}&text=${textArea.value}`, {
         method: "GET",
     })
         .then(res => res.json());
