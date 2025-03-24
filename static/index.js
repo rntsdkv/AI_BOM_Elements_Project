@@ -21,8 +21,6 @@ drop_area.addEventListener('drop', (event) => {
     drop_area.classList.remove('dragover');
     if (handleFiles(event.dataTransfer.files)) {
         drop_area.classList.add('drop');
-        // load_button.classList.remove("hidden");
-        // frame_title.classList.add("hidden");
         frame_title.textContent = "Загрузка файла...";
         frame_title.classList.add("white");
         frame_title.classList.add("small");

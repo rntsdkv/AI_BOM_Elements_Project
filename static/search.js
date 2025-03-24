@@ -1,29 +1,52 @@
 var resultsButton = document.querySelector(".results-button");
 var aiChatButton = document.querySelector(".ai-chat-button");
 var blockResults = document.querySelector(".results");
+var commentButtons = document.querySelectorAll(".comment-button");
 var blockChat = document.querySelector(".ai-chat");
 var textArea = document.querySelector(".text-edit");
 var sendBox = document.querySelector(".send");
+var commentItem  = document.querySelector(".item-comment");
 var sendButton = document.getElementById("send-button");
 var messages = document.querySelector(".messages");
 
 var reasoning = false;
 
-resultsButton.addEventListener("click", function() {
+resultsButton.addEventListener("click", function() {moveToResults()});
+
+aiChatButton.addEventListener("click", function() {moveToMessages()});
+
+function moveToResults() {
     resultsButton.classList.add("active");
     blockResults.classList.remove("hidden");
 
     aiChatButton.classList.remove("active");
     blockChat.classList.add("hidden");
-});
+}
 
-aiChatButton.addEventListener("click", function() {
+function moveToMessages(item_id=0) {
     resultsButton.classList.remove("active");
     blockResults.classList.add("hidden");
 
     aiChatButton.classList.add("active");
     blockChat.classList.remove("hidden");
-});
+    if (item_id !== 0) {
+        commentItem.classList.remove("hidden");
+        console.log("title_"+item_id);
+        let item = document.getElementById("title_"+item_id);
+        console.log(item);
+        commentItem.textContent = item.textContent;
+    }
+}
+
+for (let i = 0; i < commentButtons.length; i++) {
+    var commentButton = commentButtons[i];
+    commentButton.addEventListener("click", onCommentButtonClick, commentButton);
+}
+
+function onCommentButtonClick(commentButton) {
+    moveToMessages(item_id=this.id);
+    console.log(this.id);
+}
 
 textArea.addEventListener("input", function() {
     if (textArea.value && !reasoning) {
@@ -50,6 +73,7 @@ function sendMessage(messageText) {
     let formData = new FormData();
     formData.append("user_id", user_id);
     formData.append("text", messageText);
+    formData.append("user_id", user_id);
 
     fetch(`/send_message`, {
         method: "POST",
@@ -112,5 +136,25 @@ function getUserId() {
         if (cookie.includes("user_id")) {
             return cookie.split("=")[1];
         }
+    }
+}
+
+function getResult() {
+    let user_id = getUserId();
+    fetch(`/get_result?user_id=${user_id}`, {
+        method: 'GET',
+    })
+        .then(res => res.json())
+        .then(result => {
+            console.log(result);
+            insertResult(result.result);
+        });
+}
+
+function insertResult(result) {
+    for (let i = 0; i < result.length; i++) {
+        let id = i;
+        let title = result[i][0];
+        let item = result[i][1];
     }
 }

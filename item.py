@@ -1,3 +1,6 @@
+import pickle
+
+
 class Item:
     def __init__(self, name, url, price=0, image="", description="", characteristics=None, availability=0):
         if characteristics is None:
@@ -58,3 +61,6 @@ class Item:
                 'description': self.description,
                 'characteristics': self.characteristics,
                 'availability': self.availability}
+
+    def to_pickle(self):
+        return pickle.dumps(self)
