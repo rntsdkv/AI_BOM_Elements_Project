@@ -13,6 +13,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import config
 import re
 from item import Item
+
 import sql
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -378,8 +379,7 @@ def search_BOM(path):
     
     result_final = []
     for i in result.keys():
-        if(result[i].get("name", None) != None):
-            result_final.append((i, Item(result[i]["name"], 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"])))
+        result_final.append(i, item.Item(i, 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"], result[i]["availability"]))
 
     return result_final
 
@@ -400,7 +400,7 @@ def llm_invoke(message_id, query):
 
 
 if __name__ == "__main__":
-    print(search_BOM('/Users/mihailkluskin/Desktop/HSE/ИИ /Проект/AI_BOM_Elements_Project/test.csv'))
+    print(search_BOM('static/bom_examples/bom_example.csv'))
 
     # Генератор красивого отчёта
 #    chip = get_chipdip("Стабилизатор напряжения 5V; 6V-36V input")
