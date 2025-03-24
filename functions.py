@@ -80,21 +80,29 @@ def get_chipdip_item_info(href, capcha=capcha_fix):
                 if match:
                     stock = int(match.group())  # Преобразуем в число
                     print(f"В наличии: {stock} шт.")
+        price_tag = parser.find("span", class_="ordering__value")
+        price = None
+        if price_tag:
+            price_text = price_tag.text.strip()
+            price = int(re.sub(r"\D", "", price_text))  # Удаляем пробелы и символы, оставляем только цифры
 
     except:
         capcha(href)
         return get_chipdip_item_info(href=href, capcha=capcha)
     image_url = parser.find('img', attrs={'class': 'product__image-preview'}).get('src')
     return {'name': name, 'image_url': image_url, 'description': description, "params": params, "availability": stock,
-            "href": href}
+            "href": href, "price":price}
 
 
-def get_chipdip(query):
+def get_chipdip(query, jconst = 5):
     items = get_chipdip_items(query)
     items_dict = {}
-
+    j = 0
     for i in range(len(items)):
+        if(j >= jconst):
+            break
         items_dict[items[i]] = get_chipdip_item_info(items[i])
+        j+=1
 
     return items_dict
 
@@ -255,7 +263,7 @@ def llm_search(object, key):
     llm2 = init_chat_model("llama3-8b-8192", model_provider="groq")
     search = llm2.invoke("Ты думал вот так:" + llm.invoke(
         prompt).content + "\nВыдели из этих рассуждений финальный ответ(запрос в поисковим) и верни мне только ЕГО:")
-    chip = get_chipdip(search.content)
+    chip = get_chipdip(search.content, jconst=5)
 
     chip_availability = []
 
@@ -263,7 +271,80 @@ def llm_search(object, key):
         if (chip[i]["availability"] >= object["quantity"]):
             chip_availability.append(chip[i])
 
-    return {}
+
+
+    prompt_template = """
+    Если гдето в моём сообщении будешь видеть nan - значит там пусто
+
+    У меня есть задача найти такой электрический компанент: {name}
+    Вот от такой фабрики: {manufacturer}
+    У него обязательно должны быть вот такие характеристики:
+    {characteristics}
+
+    Я ищю это всё в магазине, на их сайте есть поиск, что я должен ввести, не используя фильтры, чтобы нашёлся нужный мне компанент.
+
+    Я нашёл два компанента:
+    1. Компанент: {name_se}
+    Описание: {manufacturer_se}
+    С вот такими характеристиками:
+    {characteristics_se}
+
+    ------
+    2. Компанент: {name_se2}
+    Описание: {manufacturer_se2}
+    С вот такими характеристиками:
+    {characteristics_se2}
+    Подумай шаг за шагом, насколько эти компаненты подходят по задачу и выбери один из них, который подходит под задачу лучше всего. Для выбора используй номера.
+"""
+    nunber_chips = [0]*len(chip_availability)
+    if(len(chip_availability) > 2):
+        for i in range(len(chip_availability)):
+            for j in range(len(chip_availability[i+1:])):
+                newi = [{"name": k, "num": chip_availability[i]["params"][k] } for k in chip_availability[i]["params"].keys()]
+                prompt_char1 = FewShotPromptTemplate(
+                    examples=newi,
+                    prefix="",
+                    example_prompt=PromptTemplate(
+                        template=exmpls_prompt,
+                        input_variables=["name", "num"],
+                        example_separator=""
+                    ),
+                    suffix="",
+                    input_variables=[]
+                )
+                newi2 = [{"name": k, "num": chip_availability[j]["params"][k] } for k in chip_availability[j]["params"].keys()]
+                prompt_char2 = FewShotPromptTemplate(
+                    examples=newi2,
+                    prefix="",
+                    example_prompt=PromptTemplate(
+                        template=exmpls_prompt,
+                        input_variables=["name", "num"],
+                        example_separator=""
+                    ),
+                    suffix="",
+                    input_variables=[]
+                )
+                prompt = PromptTemplate(
+                    template=prompt_template,
+                    input_variables=["name", "manufacturer", "characteristics","name_se", "manufacturer_se", "characteristics_se","name_se2", "manufacturer_se2", "characteristics_se2"],
+                ).format(name=key, manufacturer=object["manufacturer"], characteristics=characteristics, name_se=chip_availability[i]['name'], manufacturer_se=chip_availability[i]['description'], characteristics_se=prompt_char1.format(), name_se2=chip_availability[j]['name'], manufacturer_se2=chip_availability[j]['description'], characteristics_se2=prompt_char2.format())
+                res = llm.invoke(prompt).content
+                vibor = lambda : llm2.invoke("Выдели из этого рассуждения более подходящий модуль и в ответ верни мне 1 или 2: "+res + "\n\nВ ОТВЕТ ВЕРНИ МНЕ ТОЛЬКО 1 или 2, какой из модулей подходит лучше: ").content
+                answers = []
+                while len(answers) < 5:
+                    #Выделяем ответ
+                    answers.append(vibor())
+                    print(answers)
+                    if(answers.count(sorted(answers, key=answers.count)[-1]) > 1):
+                        break
+                    
+                if(max(set(answers), key=answers.count) == "1"):
+                    nunber_chips[i] += 1
+                else:
+                    nunber_chips[j] += 1
+    elif(len(chip_availability) == 0):
+        return {}
+    return chip_availability[nunber_chips.index(max(nunber_chips))]
 
 
 def search_BOM(path):
@@ -271,9 +352,9 @@ def search_BOM(path):
     result = {}
     print(data)
     for i in data.keys():
-        print(i)
         if (data[i]["url"] != data[i]["url"]):
-            result[i] = llm_search(data[i], i)
+            req = llm_search(data[i], i).copy()
+            result[i] = req
             result[i]["history"] = result[i].get("history", list())
             result[i]["history"].append({"type": "sys", 'msg': "Найдено по характеристикам в таблице"})
         else:
@@ -287,15 +368,20 @@ def search_BOM(path):
                 print(j, ": ", req["params"][j])
             print("/\\ " * 20)
             print("\n\n")
-            result[i] = req
+            result[i] = req.copy()
             result[i]["history"] = result[i].get("history", list())
             result[i]["history"].append({"type": "sys", 'msg': "Взято по ссылке из таблицы"})
             if (req["availability"] < data[i]["quantity"]):
-                result[i] = llm_search(data[i], i)
+                result[i] = llm_search(data[i], i).copy()
                 result[i]["history"] = result[i].get("history", list())
                 result[i]["history"].append(
                     {"type": "sys", 'msg': "Оригинала слишком мало: " + str(req["availability"])})
-    return result
+    
+    result_final = []
+    for i in result.keys():
+        result_final.append(i, item.Item(i, 'https://www.chipdip.ru'+result[i]["href"], result[i]["price"], result[i]["image_url"], result[i]["description"], result[i]["params"], result[i]["availability"], result[i]["availability"]))
+
+    return result_final
 
 
 # print(parse_bom('bom_examples/bom_example.xlsx'))
